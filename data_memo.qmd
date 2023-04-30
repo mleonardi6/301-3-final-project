@@ -1,26 +1,73 @@
 ---
 title: "Data Memo"
-author: "Griffin Harris, Mark Leonardi, Jad LASTNAME, Devin LASTNAME"
-format: html
+author: "Jad Darwiche, Griffin Harris, Devin Lai, and Mark Leonardi"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    code-fold: show
+    link-external-newwindow: true
+    
+execute:
+  echo: false
+  warning: false
+
+from: markdown+emoji  
 ---
 
-## Quarto
+## About the Project
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+For this project, we will use a dataset to investigate questions at the heart of U.S. public health and transportation policy: What causes car accidents? Are certain cars or drivers systematically more likely to be involved in accidents? Is it possible, given a certain amount of background data about owners and their vehicles, to *predict* an accident?
 
-## Running Code
+Using data from a recent [Kaggle](https://www.kaggle.com/datasets/ifteshanajnin/carinsuranceclaimprediction-classification?select=train.csv) competition, we will build predictive classification models to supply answers to these complex questions. Specifically, we will try to predict a binary outcome variable---whether or not a car insurance policyholder files a claim in the six months after they are first observed---with information about the driver and the vehicles. 
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+::: {.callout-note collapse="true"}
+## A Note on the Data 
+Kaggle provided this data already split into training and testing sets. For simplicity, we have re-combined them and will later conduct our own split.
+:::
+
+This dataset has 44 variables and nearly 100,000 predictions. These include information about the driver---like age or the population density of where they live---and about the car, such as its displacement and a series of binaries to indicate the presence of certain safety features. There are 42 predictor variables. `is_claim` is the target variable, while `policy_id` is an identifier. All 44 variable names are printed below, along with their class. 
+
 
 ```{r}
-1 + 1
-```
+#| label: colnames print
+library(tidyverse)
+load("raw_data/car_raw.rda")
 
-You can add options to executable code like this 
+sapply(car_raw, class) %>% 
+  knitr::kable()
+
+```
+### Assessment and Potential Issues
+
+Minor cleaning will be necessary. Many of the predictor variables are factors and will need to be converted to such in the cleaning process. 
+
+In addition to that kind of minor cleaning, one potential challenge this data may present is in the diversity of predictor variables. Including all 42 in one model---especially with such a large dataset---is likely to be very computationally intensive. We will therefore have to generate recipes that exclude certain variables while still attempting to capture key trends reflected by them. This will require a thorough EDA to examine relationships between multiple predictor variables and the outcome. 
+
+There are very few issues with missingness. In fact, there is no missingness in any variable except for the outcome:
 
 ```{r}
-#| echo: false
-2 * 2
+library(naniar)
+
+gg_miss_var(car_raw)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Troublingly, however, 40% of the observations have `NA` in `is_claim.` One obvious solution is to simply delete these observations. This still leaves us with nearly 60,000 total observations, which is plenty. However, we will have to investigate more carefully to ensure that there is no pattern to missing data in the outcome variable. 
+
+In the below graph, the distribution of the outcome variable is shown, with missing observations (for the time being) removed. `0` represents the policyholder *not* filing a claim within 6 months of observation; a `1` represents a filed claim.
+
+```{r}
+
+car_raw %>% 
+  filter(!is.na(car_raw$is_claim)) %>% 
+  ggplot(aes(x = is_claim, fill = is_claim, color = is_claim)) +
+  geom_bar()
+
+```
+There is significant imbalance. Whether this is a problem that can be resolved by simple stratification in the splitting and folding process or whether it will demand a more robust solution will be a question ahead. 
+
+### GitHub Link
+
+The repository for our project is [here](https://github.com/mleonardi6/301-3-final-project).
+
