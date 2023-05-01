@@ -67,6 +67,10 @@ car_raw %>%
 ```
 There is significant imbalance. Whether this is a problem that can be resolved by simple stratification in the splitting and folding process or whether it will demand a more robust solution will be a question ahead. 
 
+### Data Splitting, Resampling and Evaluation Plan
+
+Our initial plan will be a 80/20 testing training split, stratified on our target variable. Unless we see significant issues due to the imbalance of the dataset, we will stick with this plan. We will use v-fold cross validation with 5 folds and 3 repeats to ensure each model we train will produce accurate metrics of evaluation. Since we are evaluating a classification model, we will use accuracy and roc_auc as our evaluation metrics. 
+
 ### GitHub Link
 
 The repository for our project is [here](https://github.com/mleonardi6/301-3-final-project).

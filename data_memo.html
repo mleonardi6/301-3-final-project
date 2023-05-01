@@ -2538,6 +2538,7 @@ vertical-align: -.125em;
   <li><a href="#about-the-project" id="toc-about-the-project" class="nav-link active" data-scroll-target="#about-the-project">About the Project</a>
   <ul class="collapse">
   <li><a href="#assessment-and-potential-issues" id="toc-assessment-and-potential-issues" class="nav-link" data-scroll-target="#assessment-and-potential-issues">Assessment and Potential Issues</a></li>
+  <li><a href="#data-splitting-resampling-and-evaluation-plan" id="toc-data-splitting-resampling-and-evaluation-plan" class="nav-link" data-scroll-target="#data-splitting-resampling-and-evaluation-plan">Data Splitting, Resampling and Evaluation Plan</a></li>
   <li><a href="#github-link" id="toc-github-link" class="nav-link" data-scroll-target="#github-link">GitHub Link</a></li>
   </ul></li>
   </ul>
@@ -2796,6 +2797,10 @@ A Note on the Data
 </div>
 </div>
 <p>There is significant imbalance. Whether this is a problem that can be resolved by simple stratification in the splitting and folding process or whether it will demand a more robust solution will be a question ahead.</p>
+</section>
+<section id="data-splitting-resampling-and-evaluation-plan" class="level3">
+<h3 class="anchored" data-anchor-id="data-splitting-resampling-and-evaluation-plan">Data Splitting, Resampling and Evaluation Plan</h3>
+<p>Our initial plan will be a 80/20 testing training split, stratified on our target variable. Unless we see significant issues due to the imbalance of the dataset, we will stick with this plan. We will use v-fold cross validation with 5 folds and 3 repeats to ensure each model we train will produce accurate metrics of evaluation. Since we are evaluating a classification model, we will use accuracy and roc_auc as our evaluation metrics.</p>
 </section>
 <section id="github-link" class="level3">
 <h3 class="anchored" data-anchor-id="github-link">GitHub Link</h3>
