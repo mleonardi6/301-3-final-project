@@ -2,25 +2,32 @@
 
 library(tidyverse)
 library(tidymodels)
+library(naniar)
 
-### Load the original data and merge it into one file----------------------
+### Load the original data 
+car_data <- read_csv("data/train.csv") %>% 
+  mutate(
+    is_claim = factor(is_claim, levels = c(0, 1), labels = c("no", "yes"))
+  )
 
-test <- read_csv("raw_data/test.csv")
-train <- read_csv("raw_data/train.csv")
 
-car_raw <- test %>% 
-  bind_rows(train)
+### Split data
+set.seed(111)
 
-# save output
-save(car_raw, file = "raw_data/car_raw.rda")
-
-### Initial split---------------------------
-
-set.seed(1234)
-
-car_split <- initial_split(car_raw, prop = 0.8, strata = is_claim)
-
+car_split <- initial_split(car_data, prop = .8, strata = is_claim)
 car_train <- training(car_split)
 car_test <- testing(car_split)
 
-### Poking around for the data memo---------------------------
+save(car_train, car_test, file = "data/car_split.rda")
+
+### EDA
+gg_miss_var(car_data)
+
+# For group: 
+# not sure if we need to do a bunch of mutations when we load the data
+# to make variables factors
+ggplot(car_data, aes(x = is_claim, fill = is_claim, group = is_claim)) +
+  geom_bar(aes(fill = is_claim))
+
+ggplot(car_data, aes(x = is_front_fog_lights, fill = is_front_fog_lights, group = is_front_fog_lights)) +
+  geom_bar(aes(fill = is_front_fog_lights))
