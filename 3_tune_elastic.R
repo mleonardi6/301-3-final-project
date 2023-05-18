@@ -7,6 +7,7 @@ library(doMC)
 library(tictoc)
 
 ### Load required objects
+registerDoMC(cores = 8)
 load("data/car_folds.rda")
 load("data/car_split.rda")
 load("data/kitchen_sink_recipe.rda")
