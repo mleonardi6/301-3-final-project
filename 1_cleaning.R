@@ -8,6 +8,7 @@ library(naniar)
 car_data <- read_csv("data/train.csv") %>% 
   mutate(
     is_claim = factor(is_claim, levels = c(0, 1), labels = c("no", "yes"))
+    ### need to do this kind of thing for all non numeric variables in the dataset
   )
 
 ### Split data once to cut down dataset with stratifying
