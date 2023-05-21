@@ -15,7 +15,7 @@ save(car_folds, file = "data/car_folds.rda")
 
 ### Write kitchen sink recipe
 kitchen_sink_recipe <- recipe(is_claim ~ ., data = car_train) %>% 
-  step_rm(policy_id)
+  step_rm(policy_id) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_nzv(all_predictors()) %>%
   step_normalize(all_predictors()) %>% 
