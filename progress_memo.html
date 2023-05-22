@@ -2811,7 +2811,7 @@ border: 0;
 <ul>
 <li><p>We used <code>step_rm</code> to remove the <code>policy_id</code> variable since it’s only serves as an identifier</p></li>
 <li><p>We used <code>step_dummy</code> to input all the factor variables as numeric values in the models, which is necessary for models such as elastic net and support vector machine</p></li>
-<li><p>We used <code>step_nzv</code> to remove near zero-variance predictors and to handle rarely occuring categories. Also, some of the variables have a large amount of factor levels</p></li>
+<li><p>We used <code>step_nzv</code> to remove near zero-variance predictors and since some of the variables have a large amount of factor levels (over 10)</p></li>
 <li><p>We used <code>step_normalize</code> to ensure that all predictors are on the same scale</p></li>
 <li><p>We used <code>step_corr</code> to handle highly correlated predictor variables so that models such as logistic regression and support vector machines aren’t adversely affected by them</p></li>
 <li><p>We did not include imputation in our feature engineering process since missingness was not an issue in our data</p></li>
@@ -2820,7 +2820,7 @@ border: 0;
 <section id="assessment-measure" class="level3">
 <h3 class="anchored" data-anchor-id="assessment-measure">Assessment Measure</h3>
 <p>We will be using the roc_auc metric to compare performances between models and to select the best performing model. The roc_auc metric measures a model&#39;s ability to correctly classify positive and negative classes. It ranges from 0.5 to 1, with values closer to 1 indicating better classification and predictive performance.</p>
-<p>Below is a table with the roc_auc and run times of all 8 models we’ve tuned, including the null baseline model:</p>
+<p>Below is a table with the roc_auc and run times of the best models of all 8 model types we’ve tuned, including the null baseline model:</p>
 <div class="cell">
 <div class="cell-output-display">
 
@@ -2839,19 +2839,14 @@ border: 0;
    <td style="text-align:right;"> 45.324 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Elastic Net </td>
-   <td style="text-align:right;"> 0.6117908 </td>
-   <td style="text-align:right;"> 34.510 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Random Forest </td>
-   <td style="text-align:right;"> 0.5446747 </td>
-   <td style="text-align:right;"> 1499.731 </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> MARS </td>
    <td style="text-align:right;"> 0.6279114 </td>
    <td style="text-align:right;"> 28.818 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Elastic Net </td>
+   <td style="text-align:right;"> 0.6117908 </td>
+   <td style="text-align:right;"> 34.510 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Neural Network </td>
@@ -2859,19 +2854,24 @@ border: 0;
    <td style="text-align:right;"> 329.507 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Boosted Tree </td>
-   <td style="text-align:right;"> 0.6012796 </td>
-   <td style="text-align:right;"> 812.538 </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> SVM Poly </td>
    <td style="text-align:right;"> 0.6021508 </td>
    <td style="text-align:right;"> 4770.695 </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> Boosted Tree </td>
+   <td style="text-align:right;"> 0.6012796 </td>
+   <td style="text-align:right;"> 812.538 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> SVM Radial </td>
    <td style="text-align:right;"> 0.5677842 </td>
    <td style="text-align:right;"> 768.534 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Random Forest </td>
+   <td style="text-align:right;"> 0.5446747 </td>
+   <td style="text-align:right;"> 1499.731 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Null </td>
@@ -2883,7 +2883,7 @@ border: 0;
 
 </div>
 </div>
-<p>All 8 models had a higher roc_auc than the null baseline model, which means that all 8 models performed better than the null baseline model. The SVM polynomial model had by far the longest runtime, followed by the random forest model. There were no issues that occurred when the models were fitted.</p>
+<p>All 8 models had a higher roc_auc than the null baseline model, which means that all 8 models performed better than the null baseline model. The KNN model ended up having the highest roc_auc. The SVM polynomial model had by far the longest runtime, followed by the random forest model. There were no issues that occurred while the models were being fitted.</p>
 </section>
 
 </main>

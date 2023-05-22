@@ -1,12 +1,18 @@
 # get final model results
 
+# load package(s)
 library(tidymodels)
 library(tidyverse)
 library(kableExtra)
 
 tidymodels_prefer()
 
+# load files
 result_files <- list.files("results/", "*.rda", full.names = TRUE)
+
+load("data/kitchen_sink_recipe.rda")
+
+load("data/car_folds.rda")
 
 for(i in result_files){
   load(i)
@@ -49,7 +55,7 @@ model_set <- as_workflow_set(
 model_set %>% 
   autoplot(metric = "roc_auc")
 
-# plot just the best
+# plot just the best models
 model_set %>% 
   autoplot(metric = "roc_auc", select_best = TRUE) + 
   theme_minimal() +
@@ -86,14 +92,11 @@ results_table <- merge(model_results, model_times) %>%
   select(model, mean, runtime) %>% 
   rename(roc_auc = mean) 
 
-results_table %>% 
-  kbl() %>% 
-  kable_styling()
-
 results_table <- bind_rows(results_table, null_fit) 
 
-# final table
+# final results table
 results_table %>% 
+  arrange(desc(roc_auc)) %>% 
   as_tibble() %>% 
   kbl() %>% 
   kable_styling()

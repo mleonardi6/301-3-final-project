@@ -27,7 +27,7 @@ We used a kitchen sink recipe with the following feature engineering steps:
 
 -   We used `step_dummy` to input all the factor variables as numeric values in the models, which is necessary for models such as elastic net and support vector machine
 
--   We used `step_nzv` to remove near zero-variance predictors and to handle rarely occuring categories. Also, some of the variables have a large amount of factor levels
+-   We used `step_nzv` to remove near zero-variance predictors and since some of the variables have a large amount of factor levels (over 10)
 
 -   We used `step_normalize` to ensure that all predictors are on the same scale
 
@@ -39,7 +39,7 @@ We used a kitchen sink recipe with the following feature engineering steps:
 
 We will be using the roc_auc metric to compare performances between models and to select the best performing model. The roc_auc metric measures a model\'s ability to correctly classify positive and negative classes. It ranges from 0.5 to 1, with values closer to 1 indicating better classification and predictive performance.
 
-Below is a table with the roc_auc and run times of all 8 models we've tuned, including the null baseline model:
+Below is a table with the roc_auc and run times of the best models of all 8 model types we've tuned, including the null baseline model:
 
 ```{r, echo=FALSE}
 # get final model results
@@ -124,9 +124,12 @@ results_table <- merge(model_results, model_times) %>%
 results_table <- bind_rows(results_table, null_fit) 
 
 results_table %>% 
+  arrange(desc(roc_auc)) %>% 
   as_tibble() %>% 
   kbl() %>% 
   kable_styling()
 ```
 
-All 8 models had a higher roc_auc than the null baseline model, which means that all 8 models performed better than the null baseline model. The SVM polynomial model had by far the longest runtime, followed by the random forest model. There were no issues that occurred when the models were fitted.
+All 8 models had a higher roc_auc than the null baseline model, which means that all 8 models performed better than the null baseline model. The KNN model ended up having the highest roc_auc. The SVM polynomial model had by far the longest runtime, followed by the random forest model. There were no issues that occurred while the models were being fitted.
+
+
