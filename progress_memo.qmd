@@ -1,0 +1,135 @@
+---
+title: "Final Project Progress Memo 2"
+author: "Jad Darwiche, Griffin Harris, Devin Lai, and Mark Leonardi"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    code-fold: show
+    link-external-newwindow: true
+    
+execute:
+  echo: false
+  warning: false
+
+from: markdown+emoji  
+---
+
+### GitHub Link
+
+The repository for our project is [here](https://github.com/mleonardi6/301-3-final-project).
+
+### Recipe and Feature Engineering
+
+We used a kitchen sink recipe with the following feature engineering steps:
+
+-   We used `step_rm` to remove the `policy_id` variable since it's only serves as an identifier
+
+-   We used `step_dummy` to input all the factor variables as numeric values in the models, which is necessary for models such as elastic net and support vector machine
+
+-   We used `step_nzv` to remove near zero-variance predictors and since some of the variables have a large amount of factor levels (over 10)
+
+-   We used `step_normalize` to ensure that all predictors are on the same scale
+
+-   We used `step_corr` to handle highly correlated predictor variables so that models such as logistic regression and support vector machines aren't adversely affected by them
+
+-   We did not include imputation in our feature engineering process since missingness was not an issue in our data
+
+### Assessment Measure
+
+We will be using the roc_auc metric to compare performances between models and to select the best performing model. The roc_auc metric measures a model\'s ability to correctly classify positive and negative classes. It ranges from 0.5 to 1, with values closer to 1 indicating better classification and predictive performance.
+
+Below is a table with the roc_auc and run times of the best models of all 8 model types we've tuned, including the null baseline model:
+
+```{r, echo=FALSE}
+# get final model results
+
+library(tidymodels)
+library(tidyverse)
+library(kableExtra)
+
+tidymodels_prefer()
+
+result_files <- list.files("results/", "*.rda", full.names = TRUE)
+
+for(i in result_files){
+  load(i)
+}
+
+load("data/kitchen_sink_recipe.rda")
+
+load("data/car_folds.rda")
+
+##########################################
+# baseline/null model
+null_model <- null_model(mode = "classification") %>% 
+  set_engine("parsnip")
+
+null_workflow <- workflow() %>% 
+  add_model(null_model) %>% 
+  add_recipe(kitchen_sink_recipe)
+
+null_fit <- null_workflow %>% 
+  fit_resamples(resamples = car_folds,
+                control = control_resamples(save_pred = TRUE))
+
+null_fit <- null_fit %>% 
+  collect_metrics() %>% 
+  mutate(model = "Null") %>% 
+  rename(roc_auc = mean) %>% 
+  filter(.metric == "roc_auc") %>% 
+  select(model, roc_auc)
+
+####################
+# put all our tune_grids together
+model_set <- as_workflow_set(
+  "elastic_net" = elastic_net_tuned, 
+  "rand_forest" = rf_tuned,
+  "knn" = knn_tuned,
+  "boosted_tree" = boosted_tuned,
+  "neural_network" = nn_tuned,
+  "svm_poly" = svm_poly_tuned,
+  "svm_radial" = svm_radial_tuned,
+  "mars" = mars_tuned
+)
+
+model_results <- model_set %>% 
+  group_by(wflow_id) %>% 
+  mutate(best = map(result, show_best, metric = "roc_auc", n = 1)) %>% 
+  select(best) %>% 
+  unnest(cols = c(best))
+
+# computation time
+model_times <- bind_rows(elastic_net_tictoc,
+                         boosted_tictoc,
+                         rf_tictoc,
+                         knn_tictoc,
+                         nn_tictoc,
+                         svm_poly_tictoc,
+                         svm_radial_tictoc,
+                         mars_tictoc) %>% 
+  mutate(wflow_id = c("elastic_net", 
+                      "rand_forest",
+                      "knn",
+                      "boosted_tree",
+                      "neural_network",
+                      "svm_poly",
+                      "svm_radial",
+                      "mars"))
+
+results_table <- merge(model_results, model_times) %>% 
+  select(model, mean, runtime) %>% 
+  rename(roc_auc = mean) 
+
+results_table <- bind_rows(results_table, null_fit) 
+
+results_table %>% 
+  arrange(desc(roc_auc)) %>% 
+  as_tibble() %>% 
+  kbl() %>% 
+  kable_styling()
+```
+
+All 8 models had a higher roc_auc than the null baseline model, which means that all 8 models performed better than the null baseline model. The KNN model ended up having the highest roc_auc. The SVM polynomial model had by far the longest runtime, followed by the random forest model. There were no issues that occurred while the models were being fitted.
+
+

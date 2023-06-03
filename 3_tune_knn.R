@@ -10,7 +10,7 @@ library(tictoc)
 tidymodels_prefer()
 
 # load required objects ----
-registerDoMC(cores = 8)
+registerDoMC(cores = 4)
 load("data/car_folds.rda")
 load("data/car_split.rda")
 load("data/kitchen_sink_recipe.rda")

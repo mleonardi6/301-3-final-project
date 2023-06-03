@@ -9,7 +9,7 @@ library(tictoc)
 tidymodels_prefer()
 
 # load required objects ----
-registerDoMC(cores = 8)
+registerDoMC(cores = 4)
 load("data/car_folds.rda")
 load("data/car_split.rda")
 load("data/kitchen_sink_recipe.rda")
@@ -37,7 +37,7 @@ tic("Random Forest")
 
 rf_tuned <- tune_grid(
   rf_workflow, 
-  resamples = car_folsd, 
+  resamples = car_folds, 
   grid = rf_grid, 
   control = control_grid(save_pred = TRUE, 
                          save_workflow = TRUE, 
