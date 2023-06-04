@@ -11,9 +11,9 @@ tidymodels_prefer()
 
 # load required objects ----
 registerDoMC(cores = 8)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 ## define model
 mars_model <- mars(
@@ -32,7 +32,7 @@ mars_grid <- grid_regular(mars_params, levels = 5)
 # workflow ----
 mars_workflow <- workflow() %>% 
   add_model(mars_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 # fitting
 tic.clearlog()
@@ -58,4 +58,4 @@ mars_tictoc <- tibble(model = time_log[[1]]$msg,
 
 # Write out results & workflow
 
-save(mars_tuned, mars_tictoc, file = "results/mars_tuned.rda")
+save(mars_tuned, mars_tictoc, file = "results/mars_tuned2.rda")

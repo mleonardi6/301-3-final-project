@@ -11,9 +11,9 @@ tidymodels_prefer()
 
 # load required objects ----
 registerDoMC(cores = 4)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 ## define model
 svm_radial_model <- svm_rbf(
@@ -31,7 +31,7 @@ svm_radial_grid <- grid_regular(svm_radial_params, levels = 5)
 # workflow ----
 svm_radial_workflow <- workflow() %>% 
   add_model(svm_radial_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 # fitting
 tic.clearlog()

@@ -10,9 +10,9 @@ tidymodels_prefer()
 
 # load required objects ----
 registerDoMC(cores = 4)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 # Define model ----
 rf_model <- rand_forest(min_n = tune(), mtry = tune()) %>% 
@@ -29,7 +29,7 @@ rf_grid <- grid_regular(rf_params, levels = 5)
 # workflow ----
 rf_workflow <- workflow() %>% 
   add_model(rf_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 # fitting
 tic.clearlog()
@@ -54,4 +54,4 @@ rf_tictoc <- tibble(model = time_log[[1]]$msg,
 
 # Write out results & workflow
 
-save(rf_tuned, rf_tictoc, file = "results/rf_tuned.rda")
+save(rf_tuned, rf_tictoc, file = "results/rf_tuned2.rda")

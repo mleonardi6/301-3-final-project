@@ -8,9 +8,9 @@ library(tictoc)
 
 ### Load required objects
 registerDoMC(cores = 4)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 ### Define model
 elastic_net_model <- logistic_reg(penalty = tune(), mixture = tune()) %>% 
@@ -28,7 +28,7 @@ elastic_net_grid <- grid_regular(elastic_net_params, levels = 5)
 
 elastic_net_workflow <- workflow() %>% 
   add_model(elastic_net_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 ### Fitting
 tic.clearlog()
@@ -53,4 +53,4 @@ elastic_net_tictoc <- tibble(model = time_log[[1]]$msg,
 
 # Write out results & workflow
 
-save(elastic_net_tuned, elastic_net_tictoc, file = "results/elastic_net_tuned.rda")
+save(elastic_net_tuned, elastic_net_tictoc, file = "results/elastic_net_tuned2.rda")

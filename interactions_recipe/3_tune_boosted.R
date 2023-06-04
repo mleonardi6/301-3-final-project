@@ -11,9 +11,9 @@ tidymodels_prefer()
 
 # load required objects ----
 registerDoMC(cores = 4)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 # Define model ----
 
@@ -33,7 +33,7 @@ boosted_grid <- grid_regular(boosted_params, levels = 5)
 # workflow ----
 boosted_workflow <- workflow() %>% 
   add_model(boosted_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 # fitting
 tic.clearlog()
@@ -58,4 +58,4 @@ boosted_tictoc <- tibble(model = time_log[[1]]$msg,
 
 # Write out results & workflow
 
-save(boosted_tuned, boosted_tictoc, file = "results/boosted_tuned.rda")
+save(boosted_tuned, boosted_tictoc, file = "results/boosted_tuned2.rda")

@@ -11,9 +11,9 @@ tidymodels_prefer()
 
 # load required objects ----
 registerDoMC(cores = 4)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 # Define model ----
 
@@ -28,7 +28,7 @@ knn_grid <- grid_regular(knn_params, levels = 5)
 # workflow ----
 knn_workflow <- workflow() %>% 
   add_model(knn_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 # fitting
 tic.clearlog()
@@ -53,4 +53,4 @@ knn_tictoc <- tibble(model = time_log[[1]]$msg,
 
 # Write out results & workflow
 
-save(knn_tuned, knn_tictoc, file = "results/knn_tuned.rda")
+save(knn_tuned, knn_tictoc, file = "results/knn_tuned2.rda")

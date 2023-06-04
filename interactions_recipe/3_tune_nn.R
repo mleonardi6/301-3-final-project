@@ -11,9 +11,9 @@ tidymodels_prefer()
 
 # load required objects ----
 registerDoMC(cores = 4)
-load("data/car_folds.rda")
-load("data/car_split.rda")
-load("data/interactions_recipe.rda")
+load("../data/car_folds.rda")
+load("../data/car_split.rda")
+load("../data/interactions_recipe.rda")
 
 ## define model
 nn_model <- mlp(
@@ -31,7 +31,7 @@ nn_grid <- grid_regular(nn_params, levels = 5)
 # workflow ----
 nn_workflow <- workflow() %>% 
   add_model(nn_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 # fitting
 tic.clearlog()
