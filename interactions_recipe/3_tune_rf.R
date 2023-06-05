@@ -21,7 +21,7 @@ rf_model <- rand_forest(min_n = tune(), mtry = tune()) %>%
 
 # set-up tuning grid ----
 rf_params <- extract_parameter_set_dials(rf_model) %>% 
-  update(mtry = mtry(c(1, 40)))
+  update(mtry = mtry(c(1, 25)))
 
 
 rf_grid <- grid_regular(rf_params, levels = 5)

@@ -8,9 +8,11 @@ library(kableExtra)
 tidymodels_prefer()
 
 # load files
-result_files <- list.files("results/", "*.rda", full.names = TRUE)
+result_files <- list.files("interactions_recipe/results/", "*.rda", full.names = TRUE)
 
-load("data/kitchen_sink_recipe.rda")
+result_files
+
+load("data/interactions_recipe.rda")
 
 load("data/car_folds.rda")
 
