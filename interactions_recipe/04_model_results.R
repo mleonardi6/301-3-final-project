@@ -27,7 +27,7 @@ null_model <- null_model(mode = "classification") %>%
 
 null_workflow <- workflow() %>% 
   add_model(null_model) %>% 
-  add_recipe(kitchen_sink_recipe)
+  add_recipe(interactions_recipe)
 
 null_fit <- null_workflow %>% 
   fit_resamples(resamples = car_folds,
@@ -82,9 +82,9 @@ model_times <- bind_rows(elastic_net_tictoc,
                          svm_radial_tictoc,
                          mars_tictoc) %>% 
   mutate(wflow_id = c("elastic_net", 
+                      "boosted_tree",
                       "rand_forest",
                       "knn",
-                      "boosted_tree",
                       "neural_network",
                       "svm_poly",
                       "svm_radial",
