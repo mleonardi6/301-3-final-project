@@ -4,6 +4,7 @@
 library(tidyverse)
 library(tidymodels)
 library(doMC)
+library(stacks)
 
 # handle common conflicts
 tidymodels_prefer()

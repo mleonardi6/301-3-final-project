@@ -4,7 +4,7 @@
 library(tidyverse)
 library(tidymodels)
 library(doMC)
-library(tictoc)
+library(stacks)
 
 ### Load required objects
 registerDoMC(cores = 4)
