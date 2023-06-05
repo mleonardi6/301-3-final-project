@@ -29,3 +29,19 @@ skimr::skim_without_charts(car_train)
 save(interactions_recipe, file = "data/interactions_recipe.rda")
 
 ### Write another recipe
+
+interactions_recipe2 <- recipe(is_claim ~ ., data = car_train) %>% 
+  step_rm(policy_id) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
+  step_interact(~all_numeric_predictors()^2) %>% 
+  step_nzv(all_predictors()) %>%
+  step_normalize(all_predictors()) %>% 
+  step_corr(all_predictors())
+
+interactions_recipe2 %>% 
+  prep() %>% 
+  bake(new_data = NULL) %>% 
+  view()
+
+### Save recipe
+save(interactions_recipe2, file = "data/interactions_recipe2.rda")
