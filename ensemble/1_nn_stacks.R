@@ -1,4 +1,4 @@
-### KNN ----
+### Neural Network ----
 
 # Load package(s) ----
 library(tidyverse)
@@ -14,29 +14,32 @@ load("../data/car_folds.rda")
 load("../data/car_split.rda")
 load("../data/interactions_recipe.rda")
 
-# Define model ----
-
-knn_model <- nearest_neighbor(mode = "classification", 
-                              neighbors = tune()) %>% 
-  set_engine("kknn")
+## define model
+nn_model <- mlp(
+  mode = "classification",
+  hidden_units = tune(),
+  penalty = tune()
+) %>%
+  set_engine("nnet")
 
 # set-up tuning grid ----
-knn_params <- extract_parameter_set_dials(knn_model)
-knn_grid <- grid_regular(knn_params, levels = 5)
+nn_params <- extract_parameter_set_dials(nn_model)
+
+nn_grid <- grid_regular(nn_params, levels = 5)
 
 # workflow ----
-knn_workflow <- workflow() %>% 
-  add_model(knn_model) %>% 
+nn_workflow <- workflow() %>% 
+  add_model(nn_model) %>% 
   add_recipe(interactions_recipe)
 
 
-knn_stack <- tune_grid(
-  knn_workflow, 
+nn_stack <- tune_grid(
+  nn_workflow, 
   resamples = car_folds, 
-  grid = knn_grid, 
+  grid = nn_grid, 
   control = control_stack_resamples())
 
 
 # Write out results & workflow
 
-save(knn_stack, file = "results/knn_stack.rda")
+save(nn_stack, file = "results/nn_stack.rda")
