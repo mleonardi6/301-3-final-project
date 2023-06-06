@@ -38,7 +38,7 @@ mars_workflow <- workflow() %>%
 tic.clearlog()
 tic("MARS")
 
-mars_tuned <- tune_grid(
+mars_tuned_1 <- tune_grid(
   mars_workflow, 
   resamples = car_folds, 
   grid = mars_grid, 
@@ -53,9 +53,9 @@ toc(log = TRUE)
 # save runtime info
 time_log <- tic.log(format = FALSE)
 
-mars_tictoc <- tibble(model = time_log[[1]]$msg, 
+mars_tictoc_1 <- tibble(model = time_log[[1]]$msg, 
                       runtime = time_log[[1]]$toc - time_log[[1]]$tic)
 
 # Write out results & workflow
 
-save(mars_tuned, mars_tictoc, file = "results/mars_tuned2.rda")
+save(mars_tuned_1, mars_tictoc_1, file = "results/mars_tuned2.rda")

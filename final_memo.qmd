@@ -73,3 +73,60 @@ ggplot(car_train, aes(y = age_of_car, x = is_claim)) +
   geom_boxplot()
 
 ```
+
+
+## Methods
+
+# Models
+
+Nine models were fit for this project:
+
+- boosted tree
+
+- elastic net
+
+- KNN
+
+- MARS
+
+- MLP (Neural Network)
+
+- random forest
+
+- SVM radial
+
+- SVM poly
+
+- Null model
+
+Parameters that need to be tuned include:
+
+-   Elastic Net: penalty
+
+- K-Nearest Neighbors: number of nearest neighbors
+
+-   Random Forest: mtry (number of predictors at each split) and min_n (minimum number of data points at a node before it can be split)
+
+-   Boosted tree: mtry, min_n, and learn rate (weight of influence between each iteration)
+
+- MARS: num_terms, prod_degree (highest interaction degree)
+
+- MLP: hidden units and penalty
+
+- SVM radial: cost and rbf_sigma (radial basis function)
+
+- SVM poly: cost, degree, and scale factor
+
+# Recipes
+
+Three recipes were used in this project. The first recipe is a kitchen sink recipe, using `step_dummy()`, `step_nzv()`, `step_normalize()`, and `step_corr()`.
+
+The second and third recipes incorporate interactions. Using EDA, we hand selected predictors that had similar correlations to the outcome variable `is_claim` and created interactions between them. Examples of these predictors include age of car and age of policy holder, as well as height and weight. The third recipe created two way interactions between all variables. Considering this created a set of over 5000 predictors, we chose to only run this recipe on models with short run times, MARS and KNN. 
+
+# Resampling
+
+We used five cross-validation folds, stratified by the response variable `is_claim` to ensure even distribution among folds, to resample our data. Cross validation splits the training data into V folds and trains the model on V-1 of the folds, then tests the model on the last fold. The process repeats so that all folds are used for testing once, and aggregates the evaluation metric between all folds. Resampling is crucial to ensuring we produce the most accurate metrics from each model and reduces the standard error.
+
+# Metric
+
+We used ROC as our metric of evaluation, considering we are evaluating a classification model.

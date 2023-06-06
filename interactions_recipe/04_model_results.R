@@ -50,7 +50,8 @@ model_set <- as_workflow_set(
   "neural_network" = nn_tuned,
   "svm_poly" = svm_poly_tuned,
   "svm_radial" = svm_radial_tuned,
-  "mars" = mars_tuned
+  "mars_all" = mars_tuned,
+  "mars" = mars_tuned_1
 )
 
 # plot of our results

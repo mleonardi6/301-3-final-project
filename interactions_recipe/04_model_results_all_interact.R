@@ -10,6 +10,8 @@ tidymodels_prefer()
 # load files
 load("interactions_recipe/results/knn_tuned_all_interactions.rda")
 
+load("interactions_recipe/results/mars_tuned_all.rda")
+
 load("data/interactions_recipe2.rda")
 
 load("data/car_folds.rda")
@@ -18,3 +20,8 @@ knn_tuned %>%
   autoplot(metric = "roc_auc")
 
 # very bad roc_auc
+
+mars_tuned %>% 
+  autoplot(metric = "roc_auc")
+
+
