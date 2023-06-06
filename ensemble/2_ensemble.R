@@ -71,7 +71,10 @@ pred_members %>%
   filter(member != "is_claim") %>% 
   arrange(.estimate)
 
-roc_auc(pred, truth = is_claim)
+class(pred$.pred_class)
+
+
+roc_auc(pred, truth = is_claim, estimate = .pred_class)
 
 mae(pred, truth = burned, estimate = .pred)
 

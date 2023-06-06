@@ -56,11 +56,40 @@ save(car_train, car_test, file = "data/car_split.rda")
 ### EDA
 gg_miss_var(car_data)
 
-# For group: 
-# not sure if we need to do a bunch of mutations when we load the data
-# to make variables factors
 ggplot(car_data, aes(x = is_claim, fill = is_claim, group = is_claim)) +
   geom_bar(aes(fill = is_claim))
 
-ggplot(car_data, aes(x = is_front_fog_lights, fill = is_front_fog_lights, group = is_front_fog_lights)) +
+ggplot(car_full, aes(x = is_front_fog_lights, fill = is_front_fog_lights, group = is_front_fog_lights)) +
   geom_bar(aes(fill = is_front_fog_lights))
+
+ggplot(car_full, aes(x = is_front_fog_lights)) +
+  geom_bar()
+
+ggplot(car_full, aes(x = is_parking_sensors)) +
+  geom_bar()
+
+ggplot(car_full, aes(x = is_brake_assist)) +
+  geom_bar()
+
+ggplot(car_full, aes(x = is_power_steering)) +
+  geom_bar()
+
+ggplot(car_full, aes(x = age_of_policyholder)) +
+  geom_histogram()
+
+ggplot(car_full, aes(x = population_density)) +
+  geom_histogram()
+
+car_train2 <- car_train %>% 
+  select(-policy_id) %>% 
+  select(-where(is.factor)) %>% 
+  mutate(is_claim = car_train$is_claim)
+
+df_long <- car_train2 %>%
+  pivot_longer(cols = -is_claim, names_to = "Variable", values_to = "Value")
+
+# Create scatter plots for each variable against "y"
+ggplot(df_long, aes(x = is_claim, y = Value)) +
+  geom_jitter() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ Variable, scales = "free")
