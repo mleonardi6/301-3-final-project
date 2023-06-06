@@ -130,3 +130,9 @@ We used five cross-validation folds, stratified by the response variable `is_cla
 # Metric
 
 We used ROC as our metric of evaluation, considering we are evaluating a classification model.
+
+## Model Building and Selection Results
+
+## Final Model Analysis
+
+## Conclusion
