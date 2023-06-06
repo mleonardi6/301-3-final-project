@@ -1,0 +1,23 @@
+---
+title: "Crash Course - Executive Summary"
+author: "Jad Darwiche, Griffin Harris, Devin Lai, and Mark Leonardi"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    echo: false
+    link-external-newwindow: true
+    
+execute:
+  warning: false
+
+from: markdown+emoji 
+---
+
+## GitHub Repository Link
+
+The link to our project's GitHub Repository is [here](https://github.com/mleonardi6/301-3-final-project).
+
+## Objective
+
+The objective of this project was to build predictive models to classify whether car insurance policyholders filed claims within six months of purchasing a car based on background information about the car and owner. The [dataset](https://www.kaggle.com/datasets/ifteshanajnin/carinsuranceclaimprediction-classification?select=train.csv) we used came from a recent Kaggle competition and contains nearly 60,000 observations and 43 predictor variables related to information about the policyholders' cars and the policyholders themselves. The outcome variable is `is_claim`, which has two outcomes (yes and no) that indicates whether policyholders filed a claim within 6 months or not.
