@@ -35,7 +35,7 @@ elastic_net_stack <- tune_grid(
   elastic_net_workflow, 
   resamples = car_folds, 
   grid = elastic_net_grid, 
-  control = control_stack_resamples())
+  control = control_stack_grid())
 
 
 # Write out results & workflow

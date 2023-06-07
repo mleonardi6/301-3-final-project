@@ -39,7 +39,7 @@ mars_stack <- tune_grid(
   mars_workflow, 
   resamples = car_folds, 
   grid = mars_grid, 
-  control = control_stack_resamples())
+  control = control_stack_grid())
 
 
 # Write out results & workflow

@@ -37,10 +37,10 @@ boosted_workflow <- workflow() %>%
 
 
 boosted_stack <- tune_grid(
-  boosted_workflow, 
+  object = boosted_workflow, 
   resamples = car_folds, 
   grid = boosted_grid, 
-  control = control_stack_resamples())
+  control = control_stack_grid())
 
 # Write out results & workflow
 

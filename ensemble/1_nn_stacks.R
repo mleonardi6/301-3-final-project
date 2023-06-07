@@ -38,7 +38,7 @@ nn_stack <- tune_grid(
   nn_workflow, 
   resamples = car_folds, 
   grid = nn_grid, 
-  control = control_stack_resamples())
+  control = control_stack_grid())
 
 
 # Write out results & workflow
