@@ -54,9 +54,9 @@ save(stack_blend_2, file = "ensemble/results/stack_blend_2.rda")
 
 autoplot(stack_blend_2)
 
-autoplot(stack_blend, type = "members")
+autoplot(stack_blend_2, type = "members")
 
-autoplot(stack_blend, type = "weights")
+autoplot(stack_blend_2, type = "weights")
 
 # fit to ensemble to entire training set ----
 model_fit <- stack_blend %>% 
@@ -74,13 +74,17 @@ save(model_fit_2, file = "ensemble/results/model_fit_2.rda")
 load("data/car_split.rda")
 
 # Explore and assess trained ensemble model
+pred_prob <- car_test %>% 
+  select(is_claim) %>% 
+  bind_cols(predict(model_fit_2, car_test, type = "prob"))
+
 pred <- car_test %>% 
   select(is_claim) %>% 
-  bind_cols(predict(stack_blend_2, car_test))
+  bind_cols(predict(model_fit_2, car_test))
 
 pred_members <- car_test %>% 
   select(is_claim) %>% 
-  bind_cols(predict(model_fit, car_test, members = TRUE))
+  bind_cols(predict(stack_blend_2, car_test, members = TRUE))
 
 pred_members %>% 
   map_df(roc_auc, truth = is_claim, data = pred_members) %>% 
@@ -93,7 +97,7 @@ class(pred$.pred_class)
 ggplot(pred, aes(x = .pred_class)) +
   geom_bar()
 
-roc_auc(pred, truth = is_claim, estimate = .pred_class)
+roc_auc(pred_prob, truth = is_claim, estimate = .pred_No)
   
 mae(pred, truth = burned, estimate = .pred)
 

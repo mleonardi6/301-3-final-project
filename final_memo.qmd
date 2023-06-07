@@ -25,7 +25,7 @@ Car accidents are a unique threat to public health. According to the Centers for
 
 Researching patterns in car accident data is thus an important challenge. Understanding what causes them, which kinds of cars and people are most likely to be involved them, and what technologies might be most useful in preventing them are steps to building a safer system of transportation and improving public health.
 
-In this project, we offer a small contribution to that understanding. Using a dataset about car insurance policyholders obtained from a recent [Kaggle competition](https://www.kaggle.com/datasets/ifteshanajnin/carinsuranceclaimprediction-classification?select=train.csv), we explore and build predictive models to classify whether policyholders filed a claim within six months of purchasing it based on background information about the car and owner. Through the use of nine different model types, a range of hypertuning parameters, and two recipes, we were able to improve our best model's evaluation metric, `roc_auc`.
+In this project, we offer a small contribution to that understanding. Using a dataset about car insurance policyholders obtained from a recent [Kaggle competition](https://www.kaggle.com/datasets/ifteshanajnin/carinsuranceclaimprediction-classification?select=train.csv), we explore and build predictive models to classify whether policyholders filed a claim within six months of purchasing it based on background information about the car and owner. Through the use of nine different model types, a range of hypertuning parameters, and two recipes, we were able to improve our best model's evaluation metric, ``roc_auc``.
 
 ## Data Overview
 
@@ -78,7 +78,7 @@ ggplot(car_train, aes(y = age_of_car, x = is_claim)) +
 
 ## Models
 
-Nine models were fit for this project:
+**Nine models** were fit for this project:
 
 -   boosted tree
 
@@ -98,7 +98,10 @@ Nine models were fit for this project:
 
 -   Null model
 
-Parameters that need to be tuned include:
+-   Ensemble model
+
+
+**Parameters that need to be tuned** include:
 
 -   Elastic Net: penalty
 
@@ -128,11 +131,11 @@ We used five cross-validation folds, stratified by the response variable `is_cla
 
 ## Metric
 
-We used ROC_AUC as our metric of evaluation, considering we are evaluating a classification model. ROC_AUC ranges from 0.5 to 1, with with 0.5 indicating that the model performs no better than random guessing and 1 indicating that the model has perfect performance and makes no errors in classification.
+We used `roc_auc` as our metric of evaluation, considering we are evaluating a classification model. `roc_auc` ranges from 0.5 to 1, with with 0.5 indicating that the model performs no better than random guessing and 1 indicating that the model has perfect performance and makes no errors in classification.
 
 # Model Building and Selection Results
 
-As stated previously, ROC_AUC is our metric of evaluation that will be used to compare models and determine the best overall model.
+As stated previously, ``roc_auc`` is our metric of evaluation that will be used to compare models and determine the best overall model.
 
 Below is a plot and table of the results of the best performing models using the kitchen sink recipe:
 
@@ -144,7 +147,7 @@ load("ks_recipe/ks_table.rda")
 ks_table
 ```
 
-For the kitchen sink recipe, the boosted tree model performed the best with an ROC_AUC of 0.630.
+For the kitchen sink recipe, the boosted tree model performed the best with an `roc_auc` of 0.630.
 
 Below are the tuning parameters for the best performing models using the kitchen sink recipe:
 
@@ -168,7 +171,7 @@ load("interactions_recipe/int_table.rda")
 int_table
 ```
 
-For the interactions recipes, the best performing model was once again the boosted tree model with an ROC_AUC of 0.637.
+For the interactions recipes, the best performing model was once again the boosted tree model with an `roc_auc` of 0.637.
 
 Below are the tuning parameters for the best performing models using the kitchen sink recipe:
 
@@ -178,13 +181,28 @@ load("interactions_recipe/best_params_int.rda")
 best_params_int
 ```
 
-The best performing interactions model, boosted tree, had tuning parameters of mtry = 10, min_n = 40, and a learn_rate of 0.018.
+The best performing interactions model, boosted tree, had tuning parameters of `mtry` = 10, `min_n` = 40, and a `learn_rate` of 0.018.
 
 Although the boosted tree model had better performance with the interactions recipe compared to with the kitchen sink recipe, all other models had either similar or slightly worse model performance with the interactions recipe than with the kitchen sink recipe. This indicates that the predictor importance of variables such as age of car, age of policy holder, height, and weight was not significant enough to cause noticeable improvement in model performance.
 
 For both recipes, the SVM radial and KNN models had noticeably worse model performance compared to all other models. The SVM polynomial model had noticeable worse performance with the interactions recipe compared to with the kitchen sink recipe.
 
-Out of the three recipes, the boosted tree model using the interactions recipe had the highest ROC_AUC of 0.637 and was therefore the best performing model overall. This isn't too surprising since the boosted tree model uses ensemble learning and decision trees to create a more accurate model. At the same time, it was a little surprising that the more complex models with longer run times like the SVM polynomial and radial models didn't perform up to par with models with shorter run times like MARS and neural network.
+Out of the three recipes, the boosted tree model using the interactions recipe had the highest `roc_auc` of 0.637 and was therefore the best performing model overall. This isn't too surprising since the boosted tree model uses ensemble learning and decision trees to create a more accurate model. At the same time, it was a little surprising that the more complex models with longer run times like the SVM polynomial and radial models didn't perform up to par with models with shorter run times like MARS and neural network.
+
+Finally, we built an ensemble model, "stacking" the five best performing models from the interactions recipe: a boosted tree, elastic net, MARS, k-nearest-neighbors, and neural network/MLP. In this process, however, we encountered several errors. 
+
+First, the MARS model generated errors during the stacking process, which we were not able to resolve. We decided, thus, to create a second stack with only four models, excluding MARS. When building an ensemble model, it is important to achieve a balance between the number of "members" and optimal performance. The below graphs demonstrate that balance:
+
+```{r}
+load("ensemble/results/model_fit_2.rda")
+
+autoplot(model_fit_2, type = "members")
+```
+As the lower graph shows, this ensemble's `roc_auc` did not measurably improve after more than about four members. Thus, the final blended and fitted stack retained three members, and it had a `penalty` of 0.01 and `mixture` of 1. Its final `roc_auc` score was .641, which would have made the ensemble our best model. 
+
+However, other problems arose, too. First, although the model performed better than others in terms of `roc_auc`, **all of its binary predictions** were "no". In other words, the ensemble predicted the exact same outcome for every observation. Because a huge majority of test observations were, in fact, "no", this still allowed for performance that *looked* decent, even though it was not. Moreover, upon examining the weights of the ensemble model, we realized that all three of the members it kept were from the boosted tree candidate. The below graph shows this:
+
+
 
 # Final Model Analysis
 
