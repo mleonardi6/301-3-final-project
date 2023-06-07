@@ -58,7 +58,7 @@ Obviously, the true goal of our model is to be able to predict when a claim *wil
 
 The 43 predictor variables in this dataset can be grouped into several categories. These are:
 
--   **Numeric variables about the car** such as its age, width, height, weight, and turning radius.
+-   **Numeric variables about the car** such as its age, width, height, weight, and turning radius. There were no major issues with the distribution of these variables that required transformation.
 
 -   **Numeric variables about the policyholder's background** such as the person's age and the population density of the area that person lives in. Age, which is encoded as a normalized proportion (i.e., 28 years old is represented as .28), had a slight rightward skew, though not so severe that it required transformation.
 
@@ -66,13 +66,25 @@ The 43 predictor variables in this dataset can be grouped into several categorie
 
 -   **Miscellaneous variables** that are either uninformative (the policy id) or unwieldy (characters describing the engine type, of which there are many).
 
-At this stage, we conducted an extensive exploratory data analysis on the training split data to reveal relationships between predictor variables and the outcome variables that could guide feature engineering. This analysis revealed several key relationships, which are employed in the model building process.
+At this stage, we conducted an extensive exploratory data analysis on the training split data to reveal relationships between predictor variables and the outcome variables that could guide feature engineering. This analysis revealed several key relationships, which are employed in the model building process. We found, for example that heavier cars appeared more likely to get into car accidents, as the below graph shows:
 
 ```{r}
-ggplot(car_train, aes(y = age_of_car, x = is_claim)) +
+ggplot(car_train, aes(y = gross_weight, x = is_claim)) +
   geom_boxplot()
 
 ```
+We also found that policyholders with longer policy tenures---that is, they had purchased insurance to cover a longer period of time---were more likely to file a claim within six months of that purchase, as the below graph shows.
+
+```{r}
+ggplot(car_train, aes(y = policy_tenure, x = is_claim)) +
+  geom_boxplot()
+```
+Finally, we also see a slight positive relationship between a car's turning radius and its likelihood of being in a crash.
+```{r}
+ggplot(car_train, aes(y = turning_radius, x = is_claim)) +
+  geom_boxplot()
+```
+These variables are among the strongest predictors that we discovered in our analysis. However, even these do not reveal powerful, obvious relationships with the outcome variable, but subtler ones. Later in our model-building process, we use these predictors and others we discovered as interaction terms in a recipe.
 
 # Methods
 
@@ -159,7 +171,7 @@ best_params
 
 The best performing kitchen sink model, boosted tree, had tuning parameters of mtry = 20, min_n = 30, and a learn rate of 0.316.
 
-We also tuned the models using two other recipes, one including interactions with all predictors that had similar correlations to the outcome variable `is_claim`, and one that had two way interactions between all variables. Since the all interactions recipe had over 5000 predictors and would have very long computation time, only the KNN and MARS models were tuned using the all interactions recipe in order to have shorter computation time.
+We also tuned the models using two other recipes, one including interactions with all predictors that suggested strong correlations to the outcome variable `is_claim`---which predictors are discussed briefly in the "data overview" section above---and one that had two way interactions between all variables. Since the all interactions recipe had over 5000 predictors and would have very long computation time, only the KNN and MARS models were tuned using the all interactions recipe in order to have shorter computation time.
 
 Below is a plot and table of the results of the best performing models using the interactions recipes:
 
@@ -202,7 +214,11 @@ As the lower graph shows, this ensemble's `roc_auc` did not measurably improve a
 
 However, other problems arose, too. First, although the model performed better than others in terms of `roc_auc`, **all of its binary predictions** were "no". In other words, the ensemble predicted the exact same outcome for every observation. Because a huge majority of test observations were, in fact, "no", this still allowed for performance that *looked* decent, even though it was not. Moreover, upon examining the weights of the ensemble model, we realized that all three of the members it kept were from the boosted tree candidate. The below graph shows this:
 
+```{r}
 
+autoplot(stack_blend_2, type = "weights")
+```
+Thus, the ensemble model was essentially only using the boosted tree candidate, and, while it had a better `roc_auc` than other model types we had run, that was a misleading metric, since this model clearly had underlying errors that we were unable to address. For this reason, we did not select the ensemble as our final model, despite it technically performing the best in terms of our evaluation metric. 
 
 # Final Model Analysis
 

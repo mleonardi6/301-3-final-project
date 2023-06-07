@@ -53,6 +53,10 @@ car_test <- testing(car_split)
 
 save(car_train, car_test, file = "data/car_split.rda")
 
+car_full <-
+  car_test %>% 
+  bind_rows(car_train)
+
 ### EDA
 gg_miss_var(car_data)
 
@@ -78,6 +82,16 @@ ggplot(car_full, aes(x = age_of_policyholder)) +
   geom_histogram()
 
 ggplot(car_full, aes(x = population_density)) +
+  geom_histogram()
+
+ggplot(car_full, aes(x = age_of_car)) +
+  geom_histogram()
+
+ggplot(car_full, aes(x = gross_weight)) +
+  geom_histogram()
+
+
+ggplot(car_full, aes(x = turning_radius)) +
   geom_histogram()
 
 car_train2 <- car_train %>% 
