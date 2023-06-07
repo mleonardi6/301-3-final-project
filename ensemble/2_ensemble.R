@@ -27,6 +27,13 @@ data_stack <- stacks() %>%
   add_candidates(knn_stack) %>% 
   add_candidates(nn_stack)
 
+data_stack_2 <- stacks() %>% 
+  add_candidates(boosted_stack) %>% 
+  add_candidates(elastic_net_stack) %>% 
+  # add_candidates(mars_stack) %>%
+  add_candidates(knn_stack) %>%
+  add_candidates(nn_stack)
+
 
 # Fit the stack ----
 # penalty values for blending (set penalty argument when blending)
@@ -38,9 +45,14 @@ set.seed(9876)
 stack_blend <- data_stack %>% 
   blend_predictions()
 
+stack_blend_2 <- data_stack_2 %>% 
+  blend_predictions() 
+
 save(stack_blend, file = "ensemble/results/stack_blend.rda")
 
-autoplot(stack_blend)
+save(stack_blend_2, file = "ensemble/results/stack_blend_2.rda")
+
+autoplot(stack_blend_2)
 
 autoplot(stack_blend, type = "members")
 
@@ -50,8 +62,13 @@ autoplot(stack_blend, type = "weights")
 model_fit <- stack_blend %>% 
   fit_members()
 
+model_fit_2 <- stack_blend_2 %>% 
+  fit_members()
+
 # Save trained ensemble model for reproducibility & easy reference (Rmd report)
 save(model_fit, file = "ensemble/results/model_fit.rda")
+
+save(model_fit_2, file = "ensemble/results/model_fit_2.rda")
 
 # load test data
 load("data/car_split.rda")
@@ -59,7 +76,7 @@ load("data/car_split.rda")
 # Explore and assess trained ensemble model
 pred <- car_test %>% 
   select(is_claim) %>% 
-  bind_cols(predict(model_fit, car_test))
+  bind_cols(predict(stack_blend_2, car_test))
 
 pred_members <- car_test %>% 
   select(is_claim) %>% 
@@ -73,9 +90,11 @@ pred_members %>%
 
 class(pred$.pred_class)
 
+ggplot(pred, aes(x = .pred_class)) +
+  geom_bar()
 
 roc_auc(pred, truth = is_claim, estimate = .pred_class)
-
+  
 mae(pred, truth = burned, estimate = .pred)
 
 ggplot(pred, aes(x = .pred_class)) +

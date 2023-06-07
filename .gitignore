@@ -46,4 +46,4 @@ docs/
 po/*~
 
 # RStudio Connect folder
-rsconnect/
+rsconnect/.git/objects/pack/pack-0ff122583c964c6016e4d73c8c8bfc341c41cef8.pack
