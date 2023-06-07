@@ -74,65 +74,118 @@ ggplot(car_train, aes(y = age_of_car, x = is_claim)) +
 
 ```
 
+# Methods
 
-## Methods
-
-# Models
+## Models
 
 Nine models were fit for this project:
 
-- boosted tree
+-   boosted tree
 
-- elastic net
+-   elastic net
 
-- KNN
+-   KNN
 
-- MARS
+-   MARS
 
-- MLP (Neural Network)
+-   MLP (Neural Network)
 
-- random forest
+-   random forest
 
-- SVM radial
+-   SVM radial
 
-- SVM poly
+-   SVM poly
 
-- Null model
+-   Null model
 
 Parameters that need to be tuned include:
 
 -   Elastic Net: penalty
 
-- K-Nearest Neighbors: number of nearest neighbors
+-   K-Nearest Neighbors: number of nearest neighbors
 
 -   Random Forest: mtry (number of predictors at each split) and min_n (minimum number of data points at a node before it can be split)
 
 -   Boosted tree: mtry, min_n, and learn rate (weight of influence between each iteration)
 
-- MARS: num_terms, prod_degree (highest interaction degree)
+-   MARS: num_terms, prod_degree (highest interaction degree)
 
-- MLP: hidden units and penalty
+-   MLP: hidden units and penalty
 
-- SVM radial: cost and rbf_sigma (radial basis function)
+-   SVM radial: cost and rbf_sigma (radial basis function)
 
-- SVM poly: cost, degree, and scale factor
+-   SVM poly: cost, degree, and scale factor
 
-# Recipes
+## Recipes
 
 Three recipes were used in this project. The first recipe is a kitchen sink recipe, using `step_dummy()`, `step_nzv()`, `step_normalize()`, and `step_corr()`.
 
-The second and third recipes incorporate interactions. Using EDA, we hand selected predictors that had similar correlations to the outcome variable `is_claim` and created interactions between them. Examples of these predictors include age of car and age of policy holder, as well as height and weight. The third recipe created two way interactions between all variables. Considering this created a set of over 5000 predictors, we chose to only run this recipe on models with short run times, MARS and KNN. 
+The second and third recipes incorporate interactions. Using EDA, we hand selected predictors that had similar correlations to the outcome variable `is_claim` and created interactions between them. Examples of these predictors include age of car and age of policy holder, as well as height and weight. The third recipe created two way interactions between all variables. Considering this created a set of over 5000 predictors, we chose to only run this recipe on models with short run times, MARS and KNN.
 
-# Resampling
+## Resampling
 
 We used five cross-validation folds, stratified by the response variable `is_claim` to ensure even distribution among folds, to resample our data. Cross validation splits the training data into V folds and trains the model on V-1 of the folds, then tests the model on the last fold. The process repeats so that all folds are used for testing once, and aggregates the evaluation metric between all folds. Resampling is crucial to ensuring we produce the most accurate metrics from each model and reduces the standard error.
 
-# Metric
+## Metric
 
-We used ROC as our metric of evaluation, considering we are evaluating a classification model.
+We used ROC_AUC as our metric of evaluation, considering we are evaluating a classification model. ROC_AUC ranges from 0.5 to 1, with with 0.5 indicating that the model performs no better than random guessing and 1 indicating that the model has perfect performance and makes no errors in classification.
 
-## Model Building and Selection Results
+# Model Building and Selection Results
 
-## Final Model Analysis
+As stated previously, ROC_AUC is our metric of evaluation that will be used to compare models and determine the best overall model.
 
-## Conclusion
+Below is a plot and table of the results of the best performing models using the kitchen sink recipe:
+
+![](images/ks_plot.png)
+
+```{r}
+load("ks_recipe/ks_table.rda")
+
+ks_table
+```
+
+For the kitchen sink recipe, the boosted tree model performed the best with an ROC_AUC of 0.630.
+
+Below are the tuning parameters for the best performing models using the kitchen sink recipe:
+
+```{r}
+load("ks_recipe/best_params.rda")
+
+best_params
+```
+
+The best performing kitchen sink model, boosted tree, had tuning parameters of mtry = 20, min_n = 30, and a learn rate of 0.316.
+
+We also tuned the models using two other recipes, one including interactions with all predictors that had similar correlations to the outcome variable `is_claim`, and one that had two way interactions between all variables. Since the all interactions recipe had over 5000 predictors and would have very long computation time, only the KNN and MARS models were tuned using the all interactions recipe in order to have shorter computation time.
+
+Below is a plot and table of the results of the best performing models using the interactions recipes:
+
+![](images/best_plot_int.png)
+
+```{r}
+load("interactions_recipe/int_table.rda")
+
+int_table
+```
+
+For the interactions recipes, the best performing model was once again the boosted tree model with an ROC_AUC of 0.637.
+
+Below are the tuning parameters for the best performing models using the kitchen sink recipe:
+
+```{r}
+load("interactions_recipe/best_params_int.rda")
+
+best_params_int
+```
+
+The best performing interactions model, boosted tree, had tuning parameters of mtry = 10, min_n = 40, and a learn_rate of 0.018.
+
+Although the boosted tree model had better performance with the interactions recipe compared to with the kitchen sink recipe, all other models had either similar or slightly worse model performance with the interactions recipe than with the kitchen sink recipe. This indicates that the predictor importance of variables such as age of car, age of policy holder, height, and weight was not significant enough to cause noticeable improvement in model performance.
+
+For both recipes, the SVM radial and KNN models had noticeably worse model performance compared to all other models. The SVM polynomial model had noticeable worse performance with the interactions recipe compared to with the kitchen sink recipe.
+
+Out of the three recipes, the boosted tree model using the interactions recipe had the highest ROC_AUC of 0.637 and was therefore the best performing model overall. This isn't too surprising since the boosted tree model uses ensemble learning and decision trees to create a more accurate model. At the same time, it was a little surprising that the more complex models with longer run times like the SVM polynomial and radial models didn't perform up to par with models with shorter run times like MARS and neural network.
+
+# Final Model Analysis
+
+# Conclusion

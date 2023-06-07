@@ -59,12 +59,16 @@ model_set %>%
   autoplot(metric = "roc_auc")
 
 # plot just the best models
-model_set %>% 
+best_plot_int <- model_set %>% 
   autoplot(metric = "roc_auc", select_best = TRUE) + 
   theme_minimal() +
   geom_text(aes(y = mean - 0.05, label = wflow_id), angle = 90) +
   ylim(c(0.45, 0.7)) +
-  theme(legend.position = "none")
+  labs(title = "Interactions Recipe Best Model Results") +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+
+best_plot_int
 
 # table of best models
 model_results <- model_set %>% 
@@ -72,6 +76,15 @@ model_results <- model_set %>%
   mutate(best = map(result, show_best, metric = "roc_auc", n = 1)) %>% 
   select(best) %>% 
   unnest(cols = c(best))
+
+# best model parameters
+best_params_int <- model_results %>% 
+  select(-.metric, -.estimator, -n, -std_err, -.config) %>% 
+  arrange(desc(mean)) %>% 
+  kbl() %>% 
+  kable_styling()
+
+save(best_params_int, file = "interactions_recipe/best_params_int.rda")
 
 # computation time
 model_times <- bind_rows(elastic_net_tictoc,
@@ -98,8 +111,11 @@ results_table <- merge(model_results, model_times) %>%
 results_table <- bind_rows(results_table, null_fit) 
 
 # final results table
-results_table %>% 
+int_table <- results_table %>% 
   arrange(desc(roc_auc)) %>% 
   as_tibble() %>% 
   kbl() %>% 
   kable_styling()
+
+save(int_table, file = "interactions_recipe/int_table.rda")
+

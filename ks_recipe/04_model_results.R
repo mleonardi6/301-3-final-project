@@ -56,19 +56,35 @@ model_set %>%
   autoplot(metric = "roc_auc")
 
 # plot just the best models
-model_set %>% 
+best_plot_ks <- model_set %>% 
   autoplot(metric = "roc_auc", select_best = TRUE) + 
   theme_minimal() +
   geom_text(aes(y = mean - 0.05, label = wflow_id), angle = 90) +
   ylim(c(0.45, 0.7)) +
-  theme(legend.position = "none")
+  labs(
+    title = "Kitchen Sink Recipe Best Model Results"
+  ) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+
+best_plot_ks
 
 # table of best models
 model_results <- model_set %>% 
   group_by(wflow_id) %>% 
   mutate(best = map(result, show_best, metric = "roc_auc", n = 1)) %>% 
   select(best) %>% 
-  unnest(cols = c(best))
+  unnest(cols = c(best)) 
+
+# best model parameters
+best_params <- model_results %>% 
+  select(-.metric, -.estimator, -n, -std_err, -.config) %>% 
+  arrange(desc(mean)) %>% 
+  kbl() %>% 
+  kable_styling()
+
+# save table of best model parameters
+save(best_params, file = "ks_recipe/best_params.rda")
 
 # computation time
 model_times <- bind_rows(elastic_net_tictoc,
@@ -80,9 +96,9 @@ model_times <- bind_rows(elastic_net_tictoc,
                          svm_radial_tictoc,
                          mars_tictoc) %>% 
   mutate(wflow_id = c("elastic_net", 
+                      "boosted_tree",
                       "rand_forest",
                       "knn",
-                      "boosted_tree",
                       "neural_network",
                       "svm_poly",
                       "svm_radial",
@@ -95,8 +111,11 @@ results_table <- merge(model_results, model_times) %>%
 results_table <- bind_rows(results_table, null_fit) 
 
 # final results table
-results_table %>% 
+ks_table <- results_table %>% 
   arrange(desc(roc_auc)) %>% 
   as_tibble() %>% 
   kbl() %>% 
   kable_styling()
+
+# save final results table
+save(ks_table, file = "ks_recipe/ks_table.rda")
