@@ -10,12 +10,12 @@ tidymodels_prefer()
 
 # load files
 
-
 load("interactions_recipe/results/boosted_tuned3.rda")
 
 load("data/filtered_interact_recipe.rda")
 
 load("data/filtered_folds.rda")
+load("data/car_split_mars.rda")
 
 ##########################################
 # baseline/null model
@@ -44,6 +44,7 @@ null_fit <- null_fit %>%
 boosted_tuned_filtered %>% 
   autoplot(metric = "roc_auc")
 
+show_best(boosted_tuned_filtered)[1,]
 
 boosted_model <- boost_tree(mode = "classification", 
                             learn_rate = c(0.005, 0.02), 
@@ -65,22 +66,39 @@ results_prob <- filtered_test %>%
   select(c(is_claim, contains("pred")))
 
 results <- filtered_test %>% 
+  bind_cols(predict(final_fit, new_data = filtered_test, type = "prob")) %>% 
   bind_cols(predict(final_fit, new_data = filtered_test)) %>% 
   select(c(is_claim, contains("pred")))
+
+roc_auc(results_prob, truth = is_claim, estimate = .pred_No)
 
 # create new threshold for prediction probability
 new_threshold <- 0.471
 
-# Apply the new threshold to obtain the predicted class labels
-predicted_classes <- ifelse(results_prob[, ".pred_Yes"] >= new_threshold, "Yes", "No")
+results <- results %>%
+  mutate(.pred_new = ifelse(.pred_Yes >= new_threshold, 1, 0), 
+         .pred_new = factor(.pred_new, levels = c(0, 1), labels = c("No", "Yes")))
+  
 
-class_counts <- data.frame(Class = predicted_classes)
-class_counts <- transform(class_counts, Count = 1)
+# # Apply the new threshold to obtain the predicted class labels
+# predicted_classes <- ifelse(results_prob[, ".pred_Yes"] >= new_threshold, 0, 1)
+# 
+# 
+# 
+# class_counts <- data.frame(Class = predicted_classes)
+# class_counts <- transform(class_counts, Count = 1)
+# 
+# # Create the bar chart using ggplot
+# ggplot(class_counts, aes(x = .pred_Yes)) +
+#   geom_bar() +
+#   labs(title = "Predicted Classes", x = "Classes", y = "Count")
+# 
+# ggplot(predicted_classes, aes(x = .pred_class, group = is_claim, fill = is_claim)) +
+#   geom_bar()
 
-# Create the bar chart using ggplot
-ggplot(class_counts, aes(x = .pred_Yes)) +
-  geom_bar() +
-  labs(title = "Predicted Classes", x = "Classes", y = "Count")
-
-ggplot(predicted_classes, aes(x = .pred_class, group = is_claim, fill = is_claim)) +
+ggplot(results, aes(x = .pred_new, group = is_claim, fill = is_claim)) +
   geom_bar()
+
+conf_mat(results, truth = is_claim, estimate = .pred_new)
+
+save(results, file = "data/final_results.rda")

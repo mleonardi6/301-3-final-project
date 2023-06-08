@@ -15,6 +15,7 @@ execute:
 from: markdown+emoji  
 ---
 
+
 ## GitHub Repository Link
 
 The link to our project's GitHub Repository is [here](https://github.com/mleonardi6/301-3-final-project).
@@ -33,6 +34,7 @@ As mentioned, this data originally came from a public competition on Kaggle. Bec
 
 At this stage, our data required minor cleaning and checks for missingness or imbalance in the outcome variable. The data has 43 predictor variables and one outcome variable, a binary titled `is_claim` indicating whether each observation's policyholder filed a claim. Of these 44, 27 required factoring during the initial data reading process. The remainder were numeric variables or, in a several cases, character variables (indicating, for example, the engine and fuel type). In large part because this data came from a public competition---not "real-world" application---there were few issues with messiness or missingness. The graph below shows that there were *no missing values* for any of the predictor variables in our entire dataset.
 
+
 ```{r}
 library(tidyverse)
 library(tidymodels)
@@ -45,7 +47,9 @@ car_full <- car_test %>%
 gg_miss_var(car_full)
 ```
 
+
 There was, however, a large imbalance in the outcome variable `is_claim` that required attention. A value of 0 or "no" for `is_claim` meant that the policyholder had *not* filed a claim within six months of purchasing insurance, while a 1 or "yes" indicated that a claim had been filed. Predictably, a large majority of insurance holders were not involved in accidents, as the graph below of the distribution of `is_claim` in the entire dataset shows.
+
 
 ```{r}
 ggplot(car_full, aes(x = is_claim)) +
@@ -53,6 +57,7 @@ ggplot(car_full, aes(x = is_claim)) +
   theme_minimal() +
   theme(axis.title.y = element_blank())
 ```
+
 
 Obviously, the true goal of our model is to be able to predict when a claim *will* be filed, so even though those positive responses are small, they are essential to proper training and testing. Therefore, during our data split, we stratified by `is_claim`. We split the 11,719 observations into a testing set with 70% (or 8,203) of the observations and a training set with the remainder.
 
@@ -68,22 +73,28 @@ The 43 predictor variables in this dataset can be grouped into several categorie
 
 At this stage, we conducted an extensive exploratory data analysis on the training split data to reveal relationships between predictor variables and the outcome variables that could guide feature engineering. This analysis revealed several key relationships, which are employed in the model building process. We found, for example that heavier cars appeared more likely to get into car accidents, as the below graph shows:
 
+
 ```{r}
 ggplot(car_train, aes(y = gross_weight, x = is_claim)) +
   geom_boxplot()
 
 ```
+
 We also found that policyholders with longer policy tenures---that is, they had purchased insurance to cover a longer period of time---were more likely to file a claim within six months of that purchase, as the below graph shows.
+
 
 ```{r}
 ggplot(car_train, aes(y = policy_tenure, x = is_claim)) +
   geom_boxplot()
 ```
+
 Finally, we also see a slight positive relationship between a car's turning radius and its likelihood of being in a crash.
+
 ```{r}
 ggplot(car_train, aes(y = turning_radius, x = is_claim)) +
   geom_boxplot()
 ```
+
 These variables are among the strongest predictors that we discovered in our analysis. However, even these do not reveal powerful, obvious relationships with the outcome variable, but subtler ones. Later in our model-building process, we use these predictors and others we discovered as interaction terms in a recipe.
 
 # Methods
@@ -155,21 +166,25 @@ Below is a plot and table of the results of the best performing models using the
 
 ![](images/ks_plot.png)
 
+
 ```{r}
 load("ks_recipe/ks_table.rda")
 
 ks_table
 ```
 
+
 For the kitchen sink recipe, the boosted tree model performed the best with an `roc_auc` of 0.630.
 
 Below are the tuning parameters for the best performing models using the kitchen sink recipe:
+
 
 ```{r}
 load("ks_recipe/best_params.rda")
 
 best_params
 ```
+
 
 The best performing kitchen sink model, boosted tree, had tuning parameters of mtry = 20, min_n = 30, and a learn rate of 0.316.
 
@@ -179,21 +194,25 @@ Below is a plot and table of the results of the best performing models using the
 
 ![](images/best_plot_int.png)
 
+
 ```{r}
 load("interactions_recipe/int_table.rda")
 
 int_table
 ```
 
+
 For the interactions recipes, the best performing model was once again the boosted tree model with an `roc_auc` of 0.637.
 
 Below are the tuning parameters for the best performing models using the kitchen sink recipe:
+
 
 ```{r}
 load("interactions_recipe/best_params_int.rda")
 
 best_params_int
 ```
+
 
 The best performing interactions model, boosted tree, had tuning parameters of `mtry` = 10, `min_n` = 40, and a `learn_rate` of 0.018.
 
@@ -207,6 +226,7 @@ Next, we built an ensemble model, "stacking" the five best performing models fro
 
 First, the MARS model generated errors during the stacking process, which we were not able to resolve. We decided, thus, to create a second stack with only four models, excluding MARS. When building an ensemble model, it is important to achieve a balance between the number of "members" and optimal performance. The below graphs demonstrate that balance:
 
+
 ```{r}
 load("ensemble/results/model_fit_2.rda")
 load("ensemble/results/stack_blend_2.rda")
@@ -214,17 +234,21 @@ library(stacks)
 
 autoplot(model_fit_2, type = "members")
 ```
+
 As the lower graph shows, this ensemble's `roc_auc` did not measurably improve after more than about four members. Thus, the final blended and fitted stack retained three members, and it had a `penalty` of 0.01 and `mixture` of 1. Its final `roc_auc` score was .641, which would have made the ensemble our best model. 
 
 However, other problems arose, too. Upon examining the weights of the ensemble model, we realized that all three of the members it kept were from the boosted tree candidate. The below graph shows this:
+
 
 ```{r}
 
 autoplot(stack_blend_2, type = "weights")
 ```
+
 Thus, the ensemble model was essentially only using the boosted tree candidate, and, while it had a better `roc_auc` than other model types we had run, that was a misleading metric, since this model clearly had underlying errors that we were unable to address. For this reason, we did not select the ensemble as our final model, despite it technically performing the best in terms of our evaluation metric. 
 
 At this stage, it appeared as though the boosted tree recipe with interactions and narrowed tuning parameters would be our best model. However, when we fit this model to the final testing data, we noticed a major problem: the model was predicting all *no*s. In other words, every observation was predicted as a 0. While this gave us a decent `roc_auc`, that metric was misleading, since the model clearly had underlying errors. In the below graph, this problem is shown: the fill in the bar chart represents actual observations, while the x-axis represents predictions; there is not a "yes" column because 0 yeses were predicted.
+
 
 ```{r}
 load("interactions_recipe/results/boosted_retuned.rda")
@@ -255,6 +279,7 @@ ggplot(results, aes(x = .pred_class, group = is_claim, fill = is_claim)) +
 
 ```
 
+
 We believed the cause of this problem to be over-fitting, so we made several key changes to produce our final model. First, we used lasso and MARS models to do a variable reduction on our data, which we believed would reduce the problem of over-fitting and allow our model to make more realistic predictions. These key variables, pulled from the original 43 predictors, were the car's height, the policy tenure purchased, the age of the car, whether the car had a "speed alert" system, the age of the policyholder, and the car's gross weight.
 
 Next, we re-tuned the boosted tree and set the range for the parameter `learn_rate` to be very low---lower than it had been in previous scripts---to again reduce the problem of over-fitting. 
@@ -266,6 +291,7 @@ Despite these efforts, however, the final model's binary predictions were still 
 Our final model was a boosted tree, trained on folded reduced-variable data and a recipe that contained interactions between key predictor terms. The `mtry` was 5, the `min_n` was 40, and the `learn_rate` was .001.
 
 Once fitted to the full training data, this model predicted on the testing data. The final `roc_auc` score for these predictions was .643, the best score we achieved across any models. In the graph below, we show that metric with a graph of the receiver operating curve.
+
 
 ```{r}
 load("data/car_split_mars.rda")
@@ -302,7 +328,9 @@ curve <- roc_curve(
 autoplot(curve)
 ```
 
+
 As discussed above, to obtain the binary predictions that we were most interested in---the above show probabilistic predictions---we had to lower the threshold for the model to predict an observation as "yes." This threshold was lowered to .471. In the two graphs below, we show our results before and after lowering that threshold. 
+
 
 ```{r}
 load("data/final_results.rda")
@@ -317,13 +345,16 @@ plot_2 <- ggplot(results, aes(x = .pred_new)) +
 
 plot_1 + plot_2
 ```
+
 On the left, there are all "no" predictions; after lowering the threshold, some yes predictions appear on the right. This slightly improved our predictive results, but not very significantly. The confusion matrix below offers a clearer sense of the model's accuracy: 
+
 
 ```{r}
 conf_mat(results, truth = is_claim, estimate = .pred_new)
 
 
 ```
+
 Clearly, this model struggled with identifying positive cases where the policyholder had filed a claim. In only 28 cases of 236 did the model accurately predict these positives. That likely owes to several factors, the most important of them being the massive imbalance in the outcome variable described earlier, which likely skewed the model results. Moreover, we are conscious of the limited computational power available to us---a fact that also forced us to remove observations from our training set---and of the difficulty inherent to data from a well-advertised, well-sponsored public Kaggle competition. 
 
 
@@ -334,4 +365,5 @@ In this project, we used data about auto insurance policyholders and their vehic
 We used many different methods to build a strong model. Nine different model types, four different recipes, two variable reductions, and narrowed hypertuning parameters were all employed. Ultimately, our best model was a boosted tree trained on a reduced-variable recipe with interactions and optimized across three hyperparameters. This generated a `roc_auc` of .643. 
 
 In future research, the important questions at play in this project could receive further attention. Researchers with more powerful tools and techniques could continue to investigate this data. More importantly, these findings could offer guides to new data and questions---about how age impacts driving, for example, or optimal vehicle weights for the safest conditions---that might inform the public conversation. 
+
 

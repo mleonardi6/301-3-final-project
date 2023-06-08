@@ -13,7 +13,7 @@ tidymodels_prefer()
 registerDoMC(cores = 4)
 load("../data/filtered_folds.rda")
 load("../data/car_split_mars.rda")
-load("../data/filtered_interact_recipe.rda")
+load("data/filtered_interact_recipe.rda")
 
 # Define model ----
 
