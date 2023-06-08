@@ -324,7 +324,7 @@ conf_mat(results, truth = is_claim, estimate = .pred_new)
 
 
 ```
-Clearly, this model struggled with identifying positive cases where the policyholder had filed a claim. In only 28 cases of 236 did the model accurately predict these positives. That likely owes to several factors, the most important of them being the massive imbalance in the outcome variable described earlier, which likely skewed the model results. Moreover, we are conscious of the limited computational power available to us---a fact that also forced us to remove observations from our training set---and of the difficulty inherent to data from a well-advertised, well-sponsored public Kaggle competition. 
+Clearly, this model struggled with identifying positive cases where the policyholder had filed a claim. In only 28 cases of 236 did the model accurately predict these positives. That likely owes to several factors, the most important of them being the massive imbalance in the outcome variable described earlier, which likely skewed the model results. Moreover, we are conscious of the limited computational power available to us---a fact that also forced us to remove observations from our training set---and of the difficulty inherent to data from a well-advertised, well-sponsored public Kaggle competition. Putting these factors aside, it is clear that it simply is extremely difficult to predict a driver's likelihood of being involved in a car crash. There likely is a hidden pattern somewhere in this data, but it would take significantly more time, EDA, and computing power to uncover it.
 
 
 # Conclusion
