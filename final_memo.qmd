@@ -54,7 +54,7 @@ ggplot(car_full, aes(x = is_claim)) +
   theme(axis.title.y = element_blank())
 ```
 
-Obviously, the true goal of our model is to be able to predict when a claim *will* be filed, so even though those positive responses are small, they are essential to proper training and testing. Therefore, during our data split, we stratified by `is_claim`. We split the 11,719 observations into a testing set with 70% (or 8,203) of the observations and a training set with the remainder.
+Obviously, the true goal of our model is to be able to predict when a claim *will* be filed, so even though those positive responses are small, they are essential to proper training and testing. Therefore, during our data split, we stratified by `is_claim`. We split the 11,719 observations into a training set with 70% (or 8,203) of the observations and a testing set with the remainder.
 
 The 43 predictor variables in this dataset can be grouped into several categories. These are:
 
@@ -145,7 +145,7 @@ We used five cross-validation folds, stratified by the response variable `is_cla
 
 ### Metric
 
-We used `roc_auc` as our metric of evaluation, considering we are evaluating a classification model. `roc_auc` ranges from 0.5 to 1, with with 0.5 indicating that the model performs no better than random guessing and 1 indicating that the model has perfect performance and makes no errors in classification.
+We used `roc_auc` as our metric of evaluation, considering we are evaluating a classification model. `roc_auc` ranges from 0.5 to 1, with 0.5 indicating that the model performs no better than random guessing and 1 indicating that the model has perfect performance and makes no errors in classification.
 
 ## Model Building and Selection Results
 

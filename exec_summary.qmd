@@ -21,3 +21,49 @@ The link to our project's GitHub Repository is [here](https://github.com/mleonar
 ## Objective
 
 The objective of this project was to build predictive models to classify whether car insurance policyholders filed claims within six months of purchasing a car based on background information about the car and owner. The [dataset](https://www.kaggle.com/datasets/ifteshanajnin/carinsuranceclaimprediction-classification?select=train.csv) we used came from a recent Kaggle competition and contains nearly 60,000 observations and 43 predictor variables related to information about the policyholders' cars and the policyholders themselves. The outcome variable is `is_claim`, which has two outcomes (yes and no) that indicates whether policyholders filed a claim within 6 months or not.
+
+Nine different model types were fitted and tuned: boosted tree, elastic net, KNN, MARS, neural network, random forest, SVM radial, SVM polynomial, and an ensemble model. A null model was also built to act as a baseline comparison to the other models.
+
+Four recipes were created. All recipes had the following feature engineering steps: dummy encoding (step_dummy), removal of near zero variance variables (step_nzv), normalization of variables (step_normalize), and removal of highly correlated predictors (step_corr). The first recipe was a kitchen sink recipe. The second recipe contained hand selected predictor variables from EDA that had similar correlations to the outcome variable and created interactions between them. The third recipe created two way interactions between all variables. The fourth recipe used a reduced set of seven predictor variables that came from Lasso and MARS variable reduction selection and had interactions between some of the variables.
+
+The dataset was split into a 70:30 proportion with 70% of observations going into a training set that underwent v-fold cross validation resampling with five folds and three repeats and the other 30% reserved in a testing set. The metric used to evaluate model performance was roc_auc which ranges from 0.5 to 1 with 0.5 indicating that the model performs no better than random guessing and 1 indicating that the model has perfect performance and makes no errors in classification.
+
+## Best Performing Model
+
+Out of the nine model types and four recipes, the best performing model was the boosted tree model that was trained on a folded reduced-variable dataset and used the recipe that contained interactions between key predictor terms. The model had the following tuning parameters: mtry = 5, min_n = 40, and a learning rate of 0.001. Once the model predicted the testing data, it produced a final roc_auc of 0.643, which was the highest roc_auc of all models. The roc_auc curve of this best model is shown below:
+
+![](images/roc_curve.png)
+
+To obtain the binary predictions we were focusing on, the threshold for the model to predict the observation "yes" had to be lowered to 0.471 from 0.5. The following graphs show the results before and after adjusting the threshold.
+
+```{r}
+load("data/final_results.rda")
+library(tidyverse)
+library(patchwork)
+
+plot_1 <- ggplot(results, aes(x = .pred_class)) +
+  geom_bar()
+
+
+plot_2 <- ggplot(results, aes(x = .pred_new)) +
+  geom_bar()
+
+plot_1 + plot_2
+```
+
+On the left, there are all \"no\" predictions; after lowering the threshold, some yes predictions appear on the right. This slightly improved our predictive results, but not very significantly.
+
+Below is the confusion matrix for the best performing model:
+
+```{r}
+library(tidymodels)
+conf_mat(results, truth = is_claim, estimate = .pred_new)
+```
+
+This model struggled with identifying positive cases where the policyholder had filed a claim, as it only predicted 28 cases out of 236. This is most likely due to the fact that there was a massive imbalance in the outcome variable and that due to limited computation power, observations had to be removed from the training set.
+
+## Conclusion and Future Implications
+
+Overall, we tried many different methods, models, and recipes to try to build a strong model that could accurately predict whether policyholders would file a claim within six months of their insurance purchase. The best performing model ultimately was a boosted tree model trained on a reduced-variable recipe with interactions and optimized across three hyperparameters, which had a final roc_auc of 0.643 on the testing data.
+
+The model's mediocre predictive accuracy certainly leaves room for improvement but also reveals the complexity of issues in transportation policy, vehicle design, road safety, and insurance markets. Researchers with more power tools and techniques could continue to investigate this dataset and offer guides and answers to questions such as how age impacts driving, optimal vehicle weight for the safest conditions, and other relevant driving safety questions that would inform and progress the topic of driving safety.
